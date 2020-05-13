@@ -1,6 +1,9 @@
-// Check 'action' GET parameter and 'identifiant' and 'password' POST parameters 
+<?php
+
+// Check 'action' GET parameter and 'identifiant' and 'password' POST parameters
 if (isset($_GET['action'], $_POST['identifiant'], $_POST['password'])) {
-    // Get parameter values
+
+    // Get parameters
     $action = $_GET['action'];
     $identifiant = $_POST['identifiant'];
     $password = $_POST['password'];
