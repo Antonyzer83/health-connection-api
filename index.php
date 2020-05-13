@@ -1,5 +1,9 @@
 <?php
 require_once 'model.php';
+require_once 'response.php';
+
+// Use Reponse
+$response = new Response();
 
 // Check 'action' GET parameter and 'identifiant' and 'password' POST parameters
 if (isset($_GET['action'], $_POST['identifiant'], $_POST['password'])) {
@@ -25,12 +29,12 @@ if (isset($_GET['action'], $_POST['identifiant'], $_POST['password'])) {
 
             // Check insert success in database
             if ($result) {
-                echo json_encode('Success registry');
+                $response->sendResponse('Success registry');
             } else {
-                echo json_encode('Registry failed');
+                $response->sendResponse('Registry failed');
             }
         } else {
-            echo json_encode('Registry failed');
+            $response->sendResponse('Registry failed');
         }
     } elseif ($action === "login") {
         $user = $model->login($identifiant);
@@ -42,16 +46,16 @@ if (isset($_GET['action'], $_POST['identifiant'], $_POST['password'])) {
 
             // Check password entry and hashed password
             if (password_verify($password, $hashed_password)) {
-                echo json_encode('Success login');
+                $response->sendResponse('Success login');
             } else {
-                echo json_encode('Login failed');
+                $response->sendResponse('Login failed');
             }
         } else {
-            echo json_encode('Login failed');
+            $response->sendResponse('Login failed');
         }
     } else {
-        echo json_encode('RAS');
+        $response->sendResponse('No action');
     }
 } else {
-    echo json_encode("RAS");
+    $response->sendResponse('No action');
 }
