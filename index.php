@@ -1,6 +1,7 @@
 <?php
 require_once 'model.php';
 require_once 'response.php';
+require_once 'platform.php';
 
 // Use Reponse
 $response = new Response();
@@ -29,7 +30,15 @@ if (isset($_GET['action'], $_POST['identifiant'], $_POST['password'])) {
 
             // Check insert success in database
             if ($result) {
-                $response->sendResponse('Success registry');
+                // Use platform
+                $platform = new Platform();
+                $result = $platform->registerPlatform($identifiant, $password);
+
+                // Check register success to IBM platform
+                if ($result)
+                    $response->sendResponse('Success registry');
+                else
+                    $response->sendResponse('Registry failed');
             } else {
                 $response->sendResponse('Registry failed');
             }
