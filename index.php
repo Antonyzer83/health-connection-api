@@ -24,9 +24,9 @@ if (isset($_GET['action'], $_POST['identifiant'], $_POST['password'])) {
         // Check similar passwords
         if ($password === $conf_password) {
             // Hash current password before insert
-            $password = password_hash($password, PASSWORD_DEFAULT);
+            $new_password = password_hash($password, PASSWORD_DEFAULT);
 
-            $result = $model->register($identifiant, $password);
+            $result = $model->register($identifiant, $new_password);
 
             // Check insert success in database
             if ($result) {
