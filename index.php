@@ -26,24 +26,31 @@ if (isset($_GET['action'], $_POST['identifiant'], $_POST['password'])) {
             // Hash current password before insert
             $new_password = password_hash($password, PASSWORD_DEFAULT);
 
-            $result = $model->register($identifiant, $new_password);
+            // Check identifiant already exists in database
+            $exists = $model->login($identifiant);
+            if ($exists->rowCount() === 0) {
 
-            // Check insert success in database
-            if ($result) {
-                // Use platform
-                $platform = new Platform();
-                $result = $platform->registerPlatform($identifiant, $password);
+                $result = $model->register($identifiant, $new_password);
 
-                // Check register success to IBM platform
-                if ($result)
-                    $response->sendResponse('Success registry');
-                else
-                    $response->sendResponse('Registry failed');
+                // Check insert success in database
+                if ($result) {
+                    // Use platform
+                    $platform = new Platform();
+                    $result = $platform->registerPlatform($identifiant, $password);
+
+                    // Check register success to IBM platform
+                    if ($result)
+                        $response->sendResponse('Success registry');
+                    else
+                        $response->badResponse('Registry failed');
+                } else {
+                    $response->badResponse('Registry failed');
+                }
             } else {
-                $response->sendResponse('Registry failed');
+                $response->badResponse('Identifiant already exists');
             }
         } else {
-            $response->sendResponse('Registry failed');
+            $response->badResponse('Registry failed');
         }
     } elseif ($action === "login") {
         $user = $model->login($identifiant);
@@ -57,14 +64,14 @@ if (isset($_GET['action'], $_POST['identifiant'], $_POST['password'])) {
             if (password_verify($password, $hashed_password)) {
                 $response->sendResponse('Success login');
             } else {
-                $response->sendResponse('Login failed');
+                $response->badResponse('Login failed');
             }
         } else {
-            $response->sendResponse('Login failed');
+            $response->badResponse('Login failed');
         }
     } else {
-        $response->sendResponse('No action');
+        $response->badResponse('No action');
     }
 } else {
-    $response->sendResponse('No action');
+    $response->badResponse('No action');
 }
