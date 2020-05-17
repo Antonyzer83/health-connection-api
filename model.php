@@ -37,16 +37,18 @@ class Model
      *
      * @param $identifiant
      * @param $password
+     * @param $role
      * @return bool|PDOStatement
      */
-    public function register($identifiant, $password)
+    public function register($identifiant, $password, $role)
     {
-        $rqt = "INSERT INTO users VALUES(:identifiant, :password);";
+        $rqt = "INSERT INTO users VALUES(:identifiant, :password, :role);";
 
         $stmt = $this->connection->prepare($rqt);
         $stmt->execute([
             'identifiant' => $identifiant,
             'password' => $password,
+            'role' => $role
         ]);
 
         return $stmt;
@@ -56,14 +58,18 @@ class Model
      * Check login
      *
      * @param $identifiant
+     * @param $role
      * @return bool|PDOStatement
      */
-    public function login($identifiant)
+    public function login($identifiant, $role)
     {
-        $rqt = "SELECT password FROM users WHERE identifiant = :identifiant;";
+        $rqt = "SELECT password FROM users WHERE identifiant = :identifiant AND role = :role;";
 
         $stmt = $this->connection->prepare($rqt);
-        $stmt->execute(['identifiant' => $identifiant]);
+        $stmt->execute([
+            'identifiant' => $identifiant,
+            'role' => $role,
+        ]);
 
         return $stmt;
     }

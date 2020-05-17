@@ -7,12 +7,13 @@ require_once 'platform.php';
 $response = new Response();
 
 // Check 'action' GET parameter and 'identifiant' and 'password' POST parameters
-if (isset($_GET['action'], $_POST['identifiant'], $_POST['password'])) {
+if (isset($_GET['action'], $_POST['identifiant'], $_POST['password'], $_POST['role'])) {
 
     // Get parameters
     $action = $_GET['action'];
     $identifiant = $_POST['identifiant'];
     $password = $_POST['password'];
+    $role = $_POST['role'];
 
     // Use model
     $model = new Model();
@@ -27,10 +28,10 @@ if (isset($_GET['action'], $_POST['identifiant'], $_POST['password'])) {
             $new_password = password_hash($password, PASSWORD_DEFAULT);
 
             // Check identifiant already exists in database
-            $exists = $model->login($identifiant);
+            $exists = $model->login($identifiant, $role);
             if ($exists->rowCount() === 0) {
 
-                $result = $model->register($identifiant, $new_password);
+                $result = $model->register($identifiant, $new_password, $role);
 
                 // Check insert success in database
                 if ($result) {
@@ -53,7 +54,7 @@ if (isset($_GET['action'], $_POST['identifiant'], $_POST['password'])) {
             $response->badResponse('Registry failed');
         }
     } elseif ($action === "login") {
-        $user = $model->login($identifiant);
+        $user = $model->login($identifiant, $role);
 
         // Check existing user
         if ($user = $user->fetch(PDO::FETCH_ASSOC)) {
