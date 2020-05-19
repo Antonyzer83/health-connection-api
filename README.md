@@ -48,28 +48,40 @@ sudo nano /etc/apache2/sites-available/health-connection.local.conf
 
 In this file, you insert the configuration below :
 
-**Replace antony by your current user : DONT USE ROOT**
+**Replace 'antony' by your current user : DONT USE ROOT**
 
 ```apacheconfig
 <VirtualHost *:80>
-        ServerName health-connection.local
-        DocumentRoot "/home/antony/health-connection/dist"
-
-        <Directory /home/antony/health-connection/dist>
-                Options -Indexes +FollowSymLinks
-                AllowOverride All
-                Require all granted
-        </Directory>
+    DocumentRoot /home/antony/health-connection/dist
+    <Directory /home/antony/health-connection/dist>
+        Options -Indexes +FollowSymLinks
+        Require all granted
+        AllowOverride All
+        RewriteEngine on
+         Header add Access-Control-Allow-Headers "origin, x-requested-with, content-type, authorization"
+        Header add Access-Control-Allow-Methods "PUT, GET, POST, DELETE"
+        Header set Access-Control-Allow-Origin "*"
+        <IfModule mod_rewrite.c>
+            RewriteEngine On
+            RewriteBase /
+            RewriteRule ^index\.html$ - [L]
+            RewriteCond %{REQUEST_FILENAME} !-f
+            RewriteCond %{REQUEST_FILENAME} !-d
+            RewriteRule . /index.html [L]
+        </IfModule>
+     </Directory>
 </VirtualHost>
 
 <VirtualHost *:81>
-        ServerName health-connection.local
         DocumentRoot "/home/antony/health-connection-api"
-
         <Directory /home/antony/health-connection-api>
-                Options -Indexes +FollowSymLinks
-                AllowOverride All
-                Require all granted
+            Options -Indexes +FollowSymLinks
+            Header set Access-Control-Allow-Origin "*"
+            Header add Access-Control-Allow-Headers "origin, x-requested-with, content-type, authorization"
+            Header add Access-Control-Allow-Methods "PUT, GET, POST, DELETE, OPTIONS"
+            Options -Indexes +FollowSymLinks
+            AllowOverride All
+            Require all  granted
         </Directory>
 </VirtualHost>
 ```
@@ -88,3 +100,33 @@ sudo systemctl reload apache2
 ## MySQL
 
 To install and configure MySQL, you can use this very well [tutorial](https://web-community.fr/posts/laravel-debian/#6---installation-et-configuration-de-mysql) !
+
+Now, you have to create a new database. Be sure to be in the health-connection-api directory and enter the following command :
+
+**Replace 'antony' by the user created in the previous tutorial**
+
+```bash
+mysql < database.sql -u antony -p
+```
+
+## Routes
+
+### Register - POST
+
+```json
+{
+  "identifiant":"antonyzer",
+  "password":"Formation13@",
+  "c_password":"Formation13@",
+  "role":"citoyen"
+}
+```
+
+### Login - POST
+
+```json
+{
+  "identifiant":"antonyzer",
+  "password":"Formation13@"
+}
+```
