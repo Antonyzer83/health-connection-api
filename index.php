@@ -3,6 +3,17 @@ require_once 'model.php';
 require_once 'response.php';
 require_once 'platform.php';
 
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    header("Access-Control-Allow-Headers: Accept");
+    header('Access-Control-Allow-Origin: *');
+    header('Access-Control-Allow-Methods: POST, GET, DELETE, PUT, PATCH, OPTIONS');
+    header('Access-Control-Allow-Headers: token, origin, Content-Type');
+    header('Access-Control-Max-Age: 1728000');
+    header('Content-Length: 0');
+    header('Content-Type: text/plain');
+    die();
+}
+
 // Use Reponse
 $response = new Response();
 
@@ -43,9 +54,9 @@ if (isset($_GET['action'], $_POST['identifiant'], $_POST['password'], $_POST['ro
                     if ($result)
                         $response->sendResponse('Success registry');
                     else
-                        $response->badResponse('Registry failed');
+                        $response->badResponse('Registry failed at IBM');
                 } else {
-                    $response->badResponse('Registry failed');
+                    $response->badResponse('Registry failed at BDD');
                 }
             } else {
                 $response->badResponse('Identifiant already exists');
