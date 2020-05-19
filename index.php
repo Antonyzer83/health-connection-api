@@ -18,37 +18,46 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 $response = new Response();
 
 // Check 'action' GET parameter and 'identifiant' and 'password' POST parameters
-if (isset($_GET['action'], $_POST['identifiant'], $_POST['password'], $_POST['role'])) {
+if (isset($_GET['action'], $_SERVER['CONTENT_TYPE'])) {
 
-    // Get parameters
+    // Check POST Content Type as JSON
+    $content_type = $_SERVER['CONTENT_TYPE'];
+    if (stripos($content_type, 'application/json'))
+        $response->badResponse('Bad Content Type');
+
+    // Get JSON
+    $body = file_get_contents("php://input");
+    $object = json_decode($body, true);
+
+    // Check JSON
+    if (!is_array($object))
+        $response->badResponse('Failed to decode JSON');
+
+    // Get action parameter
     $action = $_GET['action'];
-    $identifiant = $_POST['identifiant'];
-    $password = $_POST['password'];
-    $role = $_POST['role'];
 
     // Use model
     $model = new Model();
 
     // Register or Login choices
-    if ($action === "register" && isset($_POST['conf_password'])) {
-        $conf_password = $_POST['conf_password'];
+    if ($action === "register" && isset($object['c_password'])) {
 
         // Check similar passwords
-        if ($password === $conf_password) {
+        if ($object['password'] === $object['c_password']) {
             // Hash current password before insert
-            $new_password = password_hash($password, PASSWORD_DEFAULT);
+            $new_password = password_hash($object['password'], PASSWORD_DEFAULT);
 
             // Check identifiant already exists in database
-            $exists = $model->login($identifiant, $role);
+            $exists = $model->login($object['identifiant'], $object['role']);
             if ($exists->rowCount() === 0) {
 
-                $result = $model->register($identifiant, $new_password, $role);
+                $result = $model->register($object['identifiant'], $new_password, $object['role']);
 
                 // Check insert success in database
                 if ($result) {
                     // Use platform
                     $platform = new Platform();
-                    $result = $platform->registerPlatform($identifiant, $password);
+                    $result = $platform->registerPlatform($object['identifiant'], $object['password']);
 
                     // Check register success to IBM platform
                     if ($result)
@@ -62,10 +71,10 @@ if (isset($_GET['action'], $_POST['identifiant'], $_POST['password'], $_POST['ro
                 $response->badResponse('Identifiant already exists');
             }
         } else {
-            $response->badResponse('Registry failed');
+            $response->badResponse('Two different passwords');
         }
     } elseif ($action === "login") {
-        $user = $model->login($identifiant, $role);
+        $user = $model->login($object['identifiant'], $object['role']);
 
         // Check existing user
         if ($user = $user->fetch(PDO::FETCH_ASSOC)) {
@@ -73,7 +82,7 @@ if (isset($_GET['action'], $_POST['identifiant'], $_POST['password'], $_POST['ro
             $hashed_password = $user['password'];
 
             // Check password entry and hashed password
-            if (password_verify($password, $hashed_password)) {
+            if (password_verify($object['password'], $hashed_password)) {
                 $response->sendResponse('Success login');
             } else {
                 $response->badResponse('Login failed');
@@ -82,8 +91,8 @@ if (isset($_GET['action'], $_POST['identifiant'], $_POST['password'], $_POST['ro
             $response->badResponse('Login failed');
         }
     } else {
-        $response->badResponse('No action');
+        $response->badResponse('Bad action');
     }
 } else {
-    $response->badResponse('No action');
+    $response->badResponse('No action & no POST');
 }
