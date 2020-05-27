@@ -7,7 +7,7 @@
 | `url`  | `mysql:host=localhost;dbname=health-connection` |
 | `user` | `username` |
 | `password` | `password` |
-| `device` | `iot-client` |
+| `type` | `iot-client` |
 | `organisation` | `mbrym4` |
 | `apiKey` | `a-mbrym4-rdf3lojgwv` |
 | `apiToken` | `5jq*9Dca6UBOQQhQpG` |
